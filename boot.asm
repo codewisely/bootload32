@@ -65,9 +65,9 @@ gdt_descriptor:
 load_GDT:
 cli
 lgdt [gdt_descriptor]         ; actual function that loads GDT
-mov eax, cr0                  ; make CR0 writable - move it to eax
-or eax, 1                     ; switch CR0 flag to 1 - enter 32 bits mode
-mov cr0, eax                  ; move it back to CR0
+mov eax, cr0                  ; make the Control Register 0 (CR0) writable - copy it to eax
+or eax, 1                     ; switch the last byte (protected mode flag) to 1
+mov cr0, eax                  ; move the value back to CR0
 ret
 
 Main:
