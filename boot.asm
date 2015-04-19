@@ -76,3 +76,46 @@ mov ax, 07c0h
 push ax
 add ax, 20h
 mov ss, ax
+pop ax
+mov ds, ax
+mov es, ax
+
+call check_a20
+call load_GDT
+
+jmp 08h:kernel                ; far jump to the kernel (or any of the 32-bit routines)
+
+[bits 32]                     ; below that line we are in the protected mode
+
+set_environment:
+mov ax, 10h
+mov ds, ax
+mov ss, ax
+mov es, ax
+mov fs, ax
+mov gs, ax
+mov esp, 0x9000
+mov ebp, esp
+ret
+
+kernel:
+call set_environment
+
+// Since we are in the 32-bits mode
+// no more interrupts!
+// we need to write directly to the memory...
+// Let's display "Hello!"
+
+mov edi, 0xB8000    ; video memory (base)
+mov [edi], 'H'
+mov [edi+0x02], 'e'
+mov [edi+0x04], 'l'
+mov [edi+0x06], 'l'
+mov [edi+0x08], 'o'
+mov [edi+0x0A], '!'
+cli                 ; clear interrupts (even though they were already disabled)
+hlt                 ; halt the CPU
+jmp $               ; another "security value" - just stay where you are :)
+
+times 510-($-$$) db 0           ; NASM-specific directive, this will fill-out the rest of the code with zeros (to the 510th byte)
+dw 0xAA55                       ; Last 2 bytes contain a boot signature.
