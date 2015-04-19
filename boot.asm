@@ -101,10 +101,10 @@ ret
 kernel:
 call set_environment
 
-// Since we are in the 32-bits mode
-// no more interrupts!
-// we need to write directly to the memory...
-// Let's display "Hello!"
+; Since we are in the 32-bits mode
+; no more interrupts!
+; we need to write directly to the memory...
+; Let's display "Hello!"
 
 mov edi, 0xB8000    ; video memory (base)
 mov [edi], 'H'
