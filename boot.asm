@@ -3,7 +3,7 @@
 
 jmp Main
 
-check_a20:    ; checks if A20 line is already enabled, if not, do so
+check_a20:    ; checks for A20 line availability
 mov ax, 0xFFFF
 mov es, ax
 mov di, 0x7E0E
@@ -27,7 +27,7 @@ call .wait
 mov al, 0xDF
 out 0x60, al
 call .wait
-jmp .return   ; if we ever get to this point, no more checks, we are almost sure A20 is somehow enabled
+jmp .return
 
 .wait:
 in al, 0x64
@@ -38,23 +38,23 @@ ret
 .return:
 ret       ; returns to our main code
 
-gdt_start:   ; Global Descriptor Table is critical for entering 32-bits mode
+gdt_start:   ; Global Descriptor Table
 gdt_null:
   dw  0
   dw  0
 gdt_code:
-  dw  0xFFFF                  ; 4GB limit
-  dw  0                       ; base
-  db  0                       ; base
-  db  10011010b               ; [present][privilege level][privilege level][code segment][code segment][conforming][readable][access]
-  db  11001111b               ; [granularity][32 bit size bit][reserved][no use][limit][limit][limit][limit]
-  db  0                       ; base
+  dw  0xFFFF      ; 4GB limit
+  dw  0           ; base
+  db  0           ; base
+  db  10011010b   ; [present][privilege level][privilege level][code segment][code segment][conforming][readable][access]
+  db  11001111b   ; [granularity][32 bit size bit][reserved][no use][limit][limit][limit][limit]
+  db  0           ; base
 gdt_data:
   dw  0xFFFF
   dw  0
   db  0
   db  10010010b
-  db  11001111b               ; [present][privilege level][privilege level][data segment][data segment][expand direction][writeable][access]
+  db  11001111b   ; [present][privilege level][privilege level][data segment][data segment][expand direction][writeable][access]
   db  0
 gdt_end:
 
@@ -83,7 +83,7 @@ mov es, ax
 call check_a20
 call load_GDT
 
-jmp 08h:kernel                ; far jump to the kernel (or any of the 32-bit routines)
+jmp 08h:kernel                ; far jump to the kernel
 
 [bits 32]                     ; below that line we are in the protected mode
 
@@ -114,7 +114,7 @@ mov [edi+0x08], 'o'
 mov [edi+0x0A], '!'
 cli                 ; clear interrupts (even though they were already disabled)
 hlt                 ; halt the CPU
-jmp $               ; another "security value" - just stay where you are :)
+jmp $               ; another "security valve" - just stay where you are :)
 
 times 510-($-$$) db 0           ; NASM-specific directive, this will fill-out the rest of the code with zeros (to the 510th byte)
-dw 0xAA55                       ; Last 2 bytes contain a boot signature.
+dw 0xAA55                       ; Last 2 bytes always contain a boot signature
