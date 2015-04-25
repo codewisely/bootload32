@@ -76,9 +76,9 @@ mov ax, 07c0h
 push ax
 add ax, 20h
 mov ss, ax
+mov sp, 1000h
 pop ax
 mov ds, ax
-mov es, ax
 
 call check_a20
 call load_GDT
